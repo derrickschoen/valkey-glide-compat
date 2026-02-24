@@ -97,6 +97,12 @@ class ClusterClient implements ClientInterface
         ?bool $use_tls = null,
         ?array $advanced_config = null,
     ) {
+        if (! extension_loaded('valkey_glide')) {
+            throw new \RuntimeException(
+                'ext-valkey_glide not loaded. Use ClientFactory::createCluster() or PhpRedisClusterClient instead.'
+            );
+        }
+
         // Parse seeds from 'host:port' format to ValkeyGlideCluster address dict format
         $parsedSeeds = null;
         if ($seeds !== null) {
@@ -154,6 +160,11 @@ class ClusterClient implements ClientInterface
 
     public function getGlideClient(): ValkeyGlideCluster
     {
+        return $this->getDriver();
+    }
+
+    public function getDriver(): ValkeyGlideCluster
+    {
         return $this->glide;
     }
 
@@ -171,7 +182,7 @@ class ClusterClient implements ClientInterface
             return true;
         }
 
-        return $this->glide->setOption($option, $value);
+        return $this->glide->setOption(Constants::mapToExtension($option), $value);
     }
 
     public function getOption(int $option): mixed
@@ -180,7 +191,7 @@ class ClusterClient implements ClientInterface
             return $this->serializer;
         }
 
-        return $this->glide->getOption($option);
+        return $this->glide->getOption(Constants::mapToExtension($option));
     }
 
     public function close(): bool

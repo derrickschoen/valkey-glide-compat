@@ -334,6 +334,14 @@ class ClientTest extends TestCase
         $this->assertInstanceOf(\ValkeyGlide::class, $glide);
     }
 
+    #[Test]
+    public function it_exposes_underlying_driver(): void
+    {
+        $driver = $this->client->getDriver();
+
+        $this->assertInstanceOf(\ValkeyGlide::class, $driver);
+    }
+
     // =========================================================================
     // Connection alias tests
     // =========================================================================
@@ -727,5 +735,32 @@ class ClientTest extends TestCase
 
         // Clean up
         $this->client->setOption(Client::OPT_PREFIX, '');
+    }
+
+    #[Test]
+    public function opt_prefix_works_with_raw_phpredis_integer(): void
+    {
+        // PHPRedis OPT_PREFIX = 2 (not the fork's 17)
+        $this->client->setOption(2, 'raw:');
+        $this->assertSame('raw:', $this->client->getOption(2));
+
+        // Verify C extension actually received it
+        $this->assertSame('raw:', $this->client->getGlideClient()->getOption(\ValkeyGlide::OPT_PREFIX));
+
+        // Clean up
+        $this->client->setOption(2, '');
+    }
+
+    #[Test]
+    public function opt_reply_literal_works_with_raw_phpredis_integer(): void
+    {
+        // PHPRedis OPT_REPLY_LITERAL = 8, fork's internal value is 1
+        $this->client->setOption(8, true);
+
+        // Verify via C extension (fork uses value 1 for OPT_REPLY_LITERAL)
+        $this->assertTrue((bool) $this->client->getGlideClient()->getOption(\ValkeyGlide::OPT_REPLY_LITERAL));
+
+        // Clean up
+        $this->client->setOption(8, false);
     }
 }

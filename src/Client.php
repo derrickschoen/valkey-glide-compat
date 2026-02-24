@@ -82,10 +82,21 @@ class Client implements ClientInterface
 
     public function __construct()
     {
+        if (! extension_loaded('valkey_glide')) {
+            throw new \RuntimeException(
+                'ext-valkey_glide not loaded. Use ClientFactory::create() or PhpRedisClient instead.'
+            );
+        }
+
         $this->glide = new ValkeyGlide();
     }
 
     public function getGlideClient(): ValkeyGlide
+    {
+        return $this->getDriver();
+    }
+
+    public function getDriver(): ValkeyGlide
     {
         return $this->glide;
     }
@@ -133,7 +144,7 @@ class Client implements ClientInterface
             return true;
         }
 
-        return $this->glide->setOption($option, $value);
+        return $this->glide->setOption(Constants::mapToExtension($option), $value);
     }
 
     public function getOption(int $option): mixed
@@ -142,7 +153,7 @@ class Client implements ClientInterface
             return $this->serializer;
         }
 
-        return $this->glide->getOption($option);
+        return $this->glide->getOption(Constants::mapToExtension($option));
     }
 
     /** @param array<mixed> $arguments */

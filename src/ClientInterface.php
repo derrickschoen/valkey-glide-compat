@@ -24,6 +24,6 @@ interface ClientInterface
 
     public function close(): bool;
 
-    /** @return \ValkeyGlide|\ValkeyGlideCluster */
-    public function getGlideClient(): \ValkeyGlide|\ValkeyGlideCluster;
+    /** Return the underlying backend driver instance. */
+    public function getDriver(): object;
 }
