@@ -17,7 +17,8 @@ namespace ValkeyGlideCompat\Concern;
  */
 trait NullGuardCommands
 {
-    abstract protected function getGlideClient(): \ValkeyGlide|\ValkeyGlideCluster;
+    /** @return \ValkeyGlide|\ValkeyGlideCluster */
+    abstract protected function getDriver(): object;
 
     abstract protected function serializeValue(mixed $value): mixed;
 
@@ -28,15 +29,15 @@ trait NullGuardCommands
         $value = $this->serializeValue($value);
 
         if ($options === null) {
-            return $this->getGlideClient()->set($key, $value);
+            return $this->getDriver()->set($key, $value);
         }
 
-        return $this->getGlideClient()->set($key, $value, $options);
+        return $this->getDriver()->set($key, $value, $options);
     }
 
     public function get(string $key): mixed
     {
-        $result = $this->getGlideClient()->get($key);
+        $result = $this->getDriver()->get($key);
 
         if ($result === false || $result === null) {
             return $result;
@@ -48,45 +49,45 @@ trait NullGuardCommands
     public function expire(string $key, int $timeout, ?string $mode = null): mixed
     {
         if ($mode === null) {
-            return $this->getGlideClient()->expire($key, $timeout);
+            return $this->getDriver()->expire($key, $timeout);
         }
 
-        return $this->getGlideClient()->expire($key, $timeout, $mode);
+        return $this->getDriver()->expire($key, $timeout, $mode);
     }
 
     public function expireAt(string $key, int $timestamp, ?string $mode = null): mixed
     {
         if ($mode === null) {
-            return $this->getGlideClient()->expireAt($key, $timestamp);
+            return $this->getDriver()->expireAt($key, $timestamp);
         }
 
-        return $this->getGlideClient()->expireAt($key, $timestamp, $mode);
+        return $this->getDriver()->expireAt($key, $timestamp, $mode);
     }
 
     public function pexpire(string $key, int $timeout, ?string $mode = null): mixed
     {
         if ($mode === null) {
-            return $this->getGlideClient()->pexpire($key, $timeout);
+            return $this->getDriver()->pexpire($key, $timeout);
         }
 
-        return $this->getGlideClient()->pexpire($key, $timeout, $mode);
+        return $this->getDriver()->pexpire($key, $timeout, $mode);
     }
 
     public function pexpireAt(string $key, int $timestamp, ?string $mode = null): mixed
     {
         if ($mode === null) {
-            return $this->getGlideClient()->pexpireAt($key, $timestamp);
+            return $this->getDriver()->pexpireAt($key, $timestamp);
         }
 
-        return $this->getGlideClient()->pexpireAt($key, $timestamp, $mode);
+        return $this->getDriver()->pexpireAt($key, $timestamp, $mode);
     }
 
     public function scriptFlush(?string $mode = null): mixed
     {
         if ($mode === null) {
-            return $this->getGlideClient()->scriptFlush();
+            return $this->getDriver()->scriptFlush();
         }
 
-        return $this->getGlideClient()->scriptFlush($mode);
+        return $this->getDriver()->scriptFlush($mode);
     }
 }

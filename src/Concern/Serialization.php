@@ -15,7 +15,7 @@ use ValkeyGlideCompat\Constants;
  */
 trait Serialization
 {
-    private int $serializer = Constants::SERIALIZER_NONE;
+    protected int $serializer = Constants::SERIALIZER_NONE;
 
     protected function serializeValue(mixed $value): mixed
     {
@@ -43,7 +43,7 @@ trait Serialization
         }
 
         return match ($this->serializer) {
-            Constants::SERIALIZER_PHP => \unserialize($value),
+            Constants::SERIALIZER_PHP => \unserialize($value, ['allowed_classes' => true]),
             Constants::SERIALIZER_JSON => json_decode($value, true),
             Constants::SERIALIZER_IGBINARY => function_exists('igbinary_unserialize')
                 ? igbinary_unserialize($value)

@@ -18,8 +18,13 @@ trait ConnectionInfo
     private int $port = 0;
     private bool $connected = false;
 
-    abstract protected function getGlideClient(): \ValkeyGlide|\ValkeyGlideCluster;
+    /** @return \ValkeyGlide|\ValkeyGlideCluster */
+    abstract protected function getDriver(): object;
 
+    /**
+     * @note ValkeyGlide manages connection pooling internally; persistent_id
+     *       is accepted for API compatibility but has no effect.
+     */
     public function connect(
         string $host = '127.0.0.1',
         int $port = 6379,
@@ -28,10 +33,19 @@ trait ConnectionInfo
         int $retry_interval = 0,
         float $read_timeout = 0.0,
     ): bool {
+        if ($persistent_id !== null) {
+            trigger_error(
+                'ValkeyGlideCompat: persistent_id is accepted for API '
+                . 'compatibility but not used by ValkeyGlide. The extension '
+                . 'manages connection pooling internally.',
+                E_USER_NOTICE,
+            );
+        }
+
         $this->host = $host;
         $this->port = $port;
 
-        $result = $this->getGlideClient()->connect(
+        $result = $this->getDriver()->connect(
             host: $host,
             port: $port,
             timeout: $timeout > 0 ? $timeout : null,
@@ -93,7 +107,7 @@ trait ConnectionInfo
 
     public function close(): bool
     {
-        $result = $this->getGlideClient()->close();
+        $result = $this->getDriver()->close();
         $this->connected = false;
 
         return $result;

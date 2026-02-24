@@ -8,7 +8,6 @@ namespace ValkeyGlideCompat;
  * phpredis-compatible constant names.
  *
  * OPT_* values 1-15 match both phpredis and the ValkeyGlide C extension.
- * The mapToExtension() helper exists as a stable API boundary.
  */
 final class Constants
 {
@@ -63,10 +62,4 @@ final class Constants
     public const BACKOFF_ALGORITHM_EXPONENTIAL = 4;
     public const BACKOFF_ALGORITHM_UNIFORM = 5;
     public const BACKOFF_ALGORITHM_CONSTANT = 6;
-
-    /** Translate a PHPRedis option ID to the C extension's ID. */
-    public static function mapToExtension(int $option): int
-    {
-        return $option;
-    }
 }

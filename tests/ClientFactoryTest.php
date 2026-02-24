@@ -97,6 +97,62 @@ class ClientFactoryTest extends TestCase
     }
 
     #[Test]
+    public function create_throws_on_unknown_backend(): void
+    {
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Unknown backend: bogus');
+
+        ClientFactory::create('bogus');
+    }
+
+    #[Test]
+    public function create_cluster_throws_on_unknown_backend(): void
+    {
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Unknown backend: bogus');
+
+        ClientFactory::createCluster('bogus', seeds: ['127.0.0.1:6379']);
+    }
+
+    #[Test]
+    public function is_available_returns_true_for_loaded_extensions(): void
+    {
+        if (extension_loaded('valkey_glide')) {
+            $this->assertTrue(ClientFactory::isAvailable(ClientFactory::BACKEND_GLIDE));
+        }
+
+        if (extension_loaded('redis')) {
+            $this->assertTrue(ClientFactory::isAvailable(ClientFactory::BACKEND_PHPREDIS));
+        }
+
+        $this->assertFalse(ClientFactory::isAvailable('nonexistent'));
+    }
+
+    #[Test]
+    public function create_cluster_with_name_only_does_not_type_error(): void
+    {
+        if (! extension_loaded('redis')) {
+            $this->markTestSkipped('ext-redis not loaded');
+        }
+
+        // Name-only cluster config (no seeds) should throw RedisClusterException
+        // because the name is not configured in php.ini — but never TypeError.
+        try {
+            ClientFactory::createCluster(
+                ClientFactory::BACKEND_PHPREDIS,
+                name: 'unconfigured_cluster',
+            );
+        } catch (\RedisClusterException $e) {
+            $this->assertStringNotContainsString('TypeError', $e->getMessage());
+
+            return;
+        }
+
+        // If it somehow connected, that's fine too
+        $this->assertTrue(true);
+    }
+
+    #[Test]
     public function create_cluster_returns_phpredis_client_when_forced(): void
     {
         if (! extension_loaded('redis')) {

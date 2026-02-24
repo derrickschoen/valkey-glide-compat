@@ -135,6 +135,25 @@ class PhpRedisClusterClientTest extends TestCase
     }
 
     #[Test]
+    public function constructor_passes_null_seeds_for_name_based_resolution(): void
+    {
+        // When using name-based cluster config, seeds should be null.
+        // RedisCluster throws RedisClusterException if the name is
+        // not configured in php.ini — but it must NOT throw TypeError.
+        try {
+            new PhpRedisClusterClient('test_cluster', null);
+        } catch (\RedisClusterException) {
+            // Expected — cluster name not configured in php.ini
+            $this->assertTrue(true);
+
+            return;
+        }
+
+        // If it connected, that's fine too
+        $this->assertTrue(true);
+    }
+
+    #[Test]
     public function magic_call_passthrough_works_for_incr_decr(): void
     {
         $this->client->set('{phpredis_cluster}counter', 10);

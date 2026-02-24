@@ -6,8 +6,10 @@ namespace ValkeyGlideCompat;
 
 use ValkeyGlideCluster;
 use ValkeyGlideCompat\Concern\ClusterRoutedCommands;
+use ValkeyGlideCompat\Concern\GlidePassthrough;
 use ValkeyGlideCompat\Concern\NullGuardCommands;
 use ValkeyGlideCompat\Concern\Serialization;
+use ValkeyGlideCompat\Concern\SerializedCallHandler;
 use ValkeyGlideCompat\Concern\SerializedCommands;
 
 /**
@@ -21,6 +23,8 @@ class ClusterClient implements ClientInterface
     use ClusterRoutedCommands;
     use Serialization;
     use SerializedCommands;
+    use SerializedCallHandler;
+    use GlidePassthrough;
 
     // Data types (phpredis Redis::REDIS_*)
     public const REDIS_NOT_FOUND = Constants::REDIS_NOT_FOUND;
@@ -158,11 +162,6 @@ class ClusterClient implements ClientInterface
         );
     }
 
-    public function getGlideClient(): ValkeyGlideCluster
-    {
-        return $this->getDriver();
-    }
-
     public function getDriver(): ValkeyGlideCluster
     {
         return $this->glide;
@@ -182,7 +181,7 @@ class ClusterClient implements ClientInterface
             return true;
         }
 
-        return $this->glide->setOption(Constants::mapToExtension($option), $value);
+        return $this->glide->setOption($option, $value);
     }
 
     public function getOption(int $option): mixed
@@ -191,7 +190,7 @@ class ClusterClient implements ClientInterface
             return $this->serializer;
         }
 
-        return $this->glide->getOption(Constants::mapToExtension($option));
+        return $this->glide->getOption($option);
     }
 
     public function close(): bool
@@ -199,9 +198,4 @@ class ClusterClient implements ClientInterface
         return $this->glide->close();
     }
 
-    /** @param array<mixed> $arguments */
-    public function __call(string $name, array $arguments): mixed
-    {
-        return $this->glide->$name(...$arguments);
-    }
 }

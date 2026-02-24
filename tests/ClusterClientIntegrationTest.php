@@ -68,6 +68,14 @@ class ClusterClientIntegrationTest extends TestCase
     }
 
     #[Test]
+    public function ping_with_no_args_works(): void
+    {
+        $result = $this->client->ping();
+
+        $this->assertTrue($result === true || $result === 'PONG');
+    }
+
+    #[Test]
     public function it_implements_client_interface(): void
     {
         $this->assertInstanceOf(ClientInterface::class, $this->client);

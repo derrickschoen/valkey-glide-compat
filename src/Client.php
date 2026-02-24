@@ -6,8 +6,10 @@ namespace ValkeyGlideCompat;
 
 use ValkeyGlide;
 use ValkeyGlideCompat\Concern\ConnectionInfo;
+use ValkeyGlideCompat\Concern\GlidePassthrough;
 use ValkeyGlideCompat\Concern\NullGuardCommands;
 use ValkeyGlideCompat\Concern\Serialization;
+use ValkeyGlideCompat\Concern\SerializedCallHandler;
 use ValkeyGlideCompat\Concern\SerializedCommands;
 
 /**
@@ -25,6 +27,8 @@ class Client implements ClientInterface
     use ConnectionInfo;
     use Serialization;
     use SerializedCommands;
+    use SerializedCallHandler;
+    use GlidePassthrough;
 
     // Data types (phpredis Redis::REDIS_*)
     public const REDIS_NOT_FOUND = Constants::REDIS_NOT_FOUND;
@@ -91,11 +95,6 @@ class Client implements ClientInterface
         $this->glide = new ValkeyGlide();
     }
 
-    public function getGlideClient(): ValkeyGlide
-    {
-        return $this->getDriver();
-    }
-
     public function getDriver(): ValkeyGlide
     {
         return $this->glide;
@@ -144,7 +143,7 @@ class Client implements ClientInterface
             return true;
         }
 
-        return $this->glide->setOption(Constants::mapToExtension($option), $value);
+        return $this->glide->setOption($option, $value);
     }
 
     public function getOption(int $option): mixed
@@ -153,12 +152,7 @@ class Client implements ClientInterface
             return $this->serializer;
         }
 
-        return $this->glide->getOption(Constants::mapToExtension($option));
+        return $this->glide->getOption($option);
     }
 
-    /** @param array<mixed> $arguments */
-    public function __call(string $name, array $arguments): mixed
-    {
-        return $this->glide->$name(...$arguments);
-    }
 }
