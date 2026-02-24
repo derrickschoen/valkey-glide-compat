@@ -101,6 +101,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     php8.3-mbstring \
     php8.3-curl \
     php8.3-zip \
+    php8.3-redis \
     git \
     unzip \
     # Protobuf-c runtime library (linked by the extension)

@@ -4,7 +4,7 @@
     "type": "library",
     "license": "Apache-2.0",
     "require": {
-        "php": "^8.2"
+        "php": "^8.3"
     },
     "suggest": {
         "ext-valkey_glide": "Required for Valkey GLIDE backend",
