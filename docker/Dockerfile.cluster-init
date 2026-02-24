@@ -1,0 +1,8 @@
+FROM valkey/valkey:8
+
+RUN apt-get update && apt-get install -y --no-install-recommends openssl && rm -rf /var/lib/apt/lists/*
+
+COPY cluster-init.sh /cluster-init.sh
+RUN chmod +x /cluster-init.sh
+
+ENTRYPOINT ["bash", "/cluster-init.sh"]

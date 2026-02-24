@@ -1,0 +1,362 @@
+services:
+  # Standalone Valkey server (primary)
+  valkey:
+    image: valkey/valkey:8
+    ports:
+      - "6379:6379"
+    command: valkey-server --enable-debug-command yes
+    networks:
+      valkey-cluster-net:
+        ipv4_address: 10.100.0.2
+
+  # Standalone Valkey replicas
+  valkey-replica-1:
+    image: valkey/valkey:8
+    command: valkey-server --port 6380 --replicaof 10.100.0.2 6379 --enable-debug-command yes
+    depends_on:
+      - valkey
+    networks:
+      valkey-cluster-net:
+        ipv4_address: 10.100.0.3
+
+  valkey-replica-2:
+    image: valkey/valkey:8
+    command: valkey-server --port 6381 --replicaof 10.100.0.2 6379 --enable-debug-command yes
+    depends_on:
+      - valkey
+    networks:
+      valkey-cluster-net:
+        ipv4_address: 10.100.0.4
+
+  # =========================================================================
+  # TLS Standalone server (for TLS standalone tests)
+  # =========================================================================
+
+  valkey-tls-standalone:
+    image: valkey/valkey:8
+    volumes:
+      - tls-certs:/tls:ro
+    depends_on:
+      cluster-init:
+        condition: service_started
+    entrypoint: >
+      sh -c "while [ ! -f /tls/.ready ]; do sleep 0.5; done; exec valkey-server
+      --tls-port 6400
+      --port 0
+      --tls-cert-file /tls/server.crt
+      --tls-key-file /tls/server.key
+      --tls-ca-cert-file /tls/ca.crt
+      --tls-auth-clients no
+      --enable-debug-command yes"
+    networks:
+      valkey-cluster-net:
+        ipv4_address: 10.100.0.40
+
+  # =========================================================================
+  # Non-TLS Cluster nodes (3 primaries + 3 replicas)
+  # =========================================================================
+
+  valkey-node-1:
+    image: valkey/valkey:8
+    command: >
+      valkey-server
+      --port 7001
+      --cluster-enabled yes
+      --cluster-config-file nodes.conf
+      --cluster-node-timeout 5000
+      --cluster-announce-ip 10.100.0.11
+      --enable-debug-command yes
+    networks:
+      valkey-cluster-net:
+        ipv4_address: 10.100.0.11
+
+  valkey-node-2:
+    image: valkey/valkey:8
+    command: >
+      valkey-server
+      --port 7002
+      --cluster-enabled yes
+      --cluster-config-file nodes.conf
+      --cluster-node-timeout 5000
+      --cluster-announce-ip 10.100.0.12
+      --enable-debug-command yes
+    networks:
+      valkey-cluster-net:
+        ipv4_address: 10.100.0.12
+
+  valkey-node-3:
+    image: valkey/valkey:8
+    command: >
+      valkey-server
+      --port 7003
+      --cluster-enabled yes
+      --cluster-config-file nodes.conf
+      --cluster-node-timeout 5000
+      --cluster-announce-ip 10.100.0.13
+      --enable-debug-command yes
+    networks:
+      valkey-cluster-net:
+        ipv4_address: 10.100.0.13
+
+  valkey-node-4:
+    image: valkey/valkey:8
+    command: >
+      valkey-server
+      --port 7004
+      --cluster-enabled yes
+      --cluster-config-file nodes.conf
+      --cluster-node-timeout 5000
+      --cluster-announce-ip 10.100.0.14
+      --enable-debug-command yes
+    networks:
+      valkey-cluster-net:
+        ipv4_address: 10.100.0.14
+
+  valkey-node-5:
+    image: valkey/valkey:8
+    command: >
+      valkey-server
+      --port 7005
+      --cluster-enabled yes
+      --cluster-config-file nodes.conf
+      --cluster-node-timeout 5000
+      --cluster-announce-ip 10.100.0.15
+      --enable-debug-command yes
+    networks:
+      valkey-cluster-net:
+        ipv4_address: 10.100.0.15
+
+  valkey-node-6:
+    image: valkey/valkey:8
+    command: >
+      valkey-server
+      --port 7006
+      --cluster-enabled yes
+      --cluster-config-file nodes.conf
+      --cluster-node-timeout 5000
+      --cluster-announce-ip 10.100.0.16
+      --enable-debug-command yes
+    networks:
+      valkey-cluster-net:
+        ipv4_address: 10.100.0.16
+
+  # =========================================================================
+  # TLS Cluster nodes (3 primaries, no replicas)
+  # =========================================================================
+
+  valkey-tls-node-1:
+    image: valkey/valkey:8
+    command: >
+      valkey-server
+      --tls-port 7011
+      --port 0
+      --tls-cert-file /tls/server.crt
+      --tls-key-file /tls/server.key
+      --tls-ca-cert-file /tls/ca.crt
+      --tls-auth-clients no
+      --tls-replication yes
+      --cluster-enabled yes
+      --cluster-config-file nodes.conf
+      --cluster-node-timeout 5000
+      --cluster-announce-ip 10.100.0.21
+      --enable-debug-command yes
+    volumes:
+      - tls-certs:/tls:ro
+    depends_on:
+      cluster-init:
+        condition: service_started
+    # Wait for TLS certs to be generated before starting
+    entrypoint: >
+      sh -c "while [ ! -f /tls/.ready ]; do sleep 0.5; done; exec valkey-server
+      --tls-port 7011
+      --port 0
+      --tls-cert-file /tls/server.crt
+      --tls-key-file /tls/server.key
+      --tls-ca-cert-file /tls/ca.crt
+      --tls-auth-clients no
+      --tls-replication yes
+      --cluster-enabled yes
+      --cluster-config-file nodes.conf
+      --cluster-node-timeout 5000
+      --cluster-announce-ip 10.100.0.21
+      --enable-debug-command yes"
+    networks:
+      valkey-cluster-net:
+        ipv4_address: 10.100.0.21
+
+  valkey-tls-node-2:
+    image: valkey/valkey:8
+    volumes:
+      - tls-certs:/tls:ro
+    depends_on:
+      cluster-init:
+        condition: service_started
+    entrypoint: >
+      sh -c "while [ ! -f /tls/.ready ]; do sleep 0.5; done; exec valkey-server
+      --tls-port 7012
+      --port 0
+      --tls-cert-file /tls/server.crt
+      --tls-key-file /tls/server.key
+      --tls-ca-cert-file /tls/ca.crt
+      --tls-auth-clients no
+      --tls-replication yes
+      --cluster-enabled yes
+      --cluster-config-file nodes.conf
+      --cluster-node-timeout 5000
+      --cluster-announce-ip 10.100.0.22
+      --enable-debug-command yes"
+    networks:
+      valkey-cluster-net:
+        ipv4_address: 10.100.0.22
+
+  valkey-tls-node-3:
+    image: valkey/valkey:8
+    volumes:
+      - tls-certs:/tls:ro
+    depends_on:
+      cluster-init:
+        condition: service_started
+    entrypoint: >
+      sh -c "while [ ! -f /tls/.ready ]; do sleep 0.5; done; exec valkey-server
+      --tls-port 7013
+      --port 0
+      --tls-cert-file /tls/server.crt
+      --tls-key-file /tls/server.key
+      --tls-ca-cert-file /tls/ca.crt
+      --tls-auth-clients no
+      --tls-replication yes
+      --cluster-enabled yes
+      --cluster-config-file nodes.conf
+      --cluster-node-timeout 5000
+      --cluster-announce-ip 10.100.0.23
+      --enable-debug-command yes"
+    networks:
+      valkey-cluster-net:
+        ipv4_address: 10.100.0.23
+
+  # =========================================================================
+  # Auth Cluster nodes (3 primaries, no replicas, password-protected)
+  # =========================================================================
+
+  valkey-auth-node-1:
+    image: valkey/valkey:8
+    command: >
+      valkey-server
+      --port 7031
+      --requirepass dummy_password
+      --cluster-enabled yes
+      --cluster-config-file nodes.conf
+      --cluster-node-timeout 5000
+      --cluster-announce-ip 10.100.0.31
+      --enable-debug-command yes
+    networks:
+      valkey-cluster-net:
+        ipv4_address: 10.100.0.31
+
+  valkey-auth-node-2:
+    image: valkey/valkey:8
+    command: >
+      valkey-server
+      --port 7032
+      --requirepass dummy_password
+      --cluster-enabled yes
+      --cluster-config-file nodes.conf
+      --cluster-node-timeout 5000
+      --cluster-announce-ip 10.100.0.32
+      --enable-debug-command yes
+    networks:
+      valkey-cluster-net:
+        ipv4_address: 10.100.0.32
+
+  valkey-auth-node-3:
+    image: valkey/valkey:8
+    command: >
+      valkey-server
+      --port 7033
+      --requirepass dummy_password
+      --cluster-enabled yes
+      --cluster-config-file nodes.conf
+      --cluster-node-timeout 5000
+      --cluster-announce-ip 10.100.0.33
+      --enable-debug-command yes
+    networks:
+      valkey-cluster-net:
+        ipv4_address: 10.100.0.33
+
+  # =========================================================================
+  # Cluster initialization (creates all clusters after nodes are ready)
+  # =========================================================================
+
+  cluster-init:
+    build:
+      context: ./docker
+      dockerfile: Dockerfile.cluster-init
+    volumes:
+      - tls-certs:/tls
+    depends_on:
+      - valkey-node-1
+      - valkey-node-2
+      - valkey-node-3
+      - valkey-node-4
+      - valkey-node-5
+      - valkey-node-6
+      - valkey-auth-node-1
+      - valkey-auth-node-2
+      - valkey-auth-node-3
+    networks:
+      valkey-cluster-net:
+        ipv4_address: 10.100.0.50
+
+  # =========================================================================
+  # PHP development environment
+  # =========================================================================
+
+  php-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    entrypoint: ["bash", "/app/docker/entrypoint-dev.sh"]
+    volumes:
+      # Mount compat package for live development
+      - .:/app/valkey-glide-compat
+      # Mount TLS certs for TLS cluster tests
+      - tls-certs:/tls:ro
+      # Mount docker scripts
+      - ./docker:/app/docker
+    depends_on:
+      - valkey
+      - valkey-tls-standalone
+      - cluster-init
+    environment:
+      - VALKEY_HOST=valkey
+      - VALKEY_PORT=6379
+      - VALKEY_CLUSTER_HOST=10.100.0.11
+      - VALKEY_CLUSTER_PORT=7001
+      - VALKEY_CLUSTER_TLS_HOST=10.100.0.21
+      - VALKEY_CLUSTER_TLS_PORT=7011
+      - VALKEY_AUTH_CLUSTER_HOST=10.100.0.31
+      - VALKEY_AUTH_CLUSTER_PORT=7031
+      - VALKEY_AUTH_CLUSTER_PASSWORD=dummy_password
+      - VALKEY_REPLICA1_HOST=10.100.0.3
+      - VALKEY_REPLICA1_PORT=6380
+      - VALKEY_REPLICA2_HOST=10.100.0.4
+      - VALKEY_REPLICA2_PORT=6381
+      - VALKEY_TLS_STANDALONE_HOST=valkey-tls-standalone
+      - VALKEY_TLS_STANDALONE_PORT=6400
+      - VALKEY_TLS_CA_CERT=/tls/ca.crt
+    working_dir: /app/valkey-glide-compat
+    # Keep container running for interactive development
+    command: ["tail", "-f", "/dev/null"]
+    networks:
+      valkey-cluster-net:
+        ipv4_address: 10.100.0.51
+
+networks:
+  valkey-cluster-net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.100.0.0/24
+
+volumes:
+  tls-certs:
