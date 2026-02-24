@@ -90,21 +90,94 @@ class ConstantsTest extends TestCase
 
     #[Test]
     #[DataProvider('sharedConstantsProvider')]
-    public function shared_constants_match_c_extension(string $constName): void
-    {
-        $compatValue = constant(Client::class . '::' . $constName);
-        $glideValue = constant(ValkeyGlide::class . '::' . $constName);
-
-        $this->assertSame($glideValue, $compatValue, "Client::{$constName} should match ValkeyGlide::{$constName}");
-    }
-
-    #[Test]
-    #[DataProvider('sharedConstantsProvider')]
     public function constants_class_matches_client_class(string $constName): void
     {
         $constantsValue = constant(Constants::class . '::' . $constName);
         $clientValue = constant(Client::class . '::' . $constName);
 
         $this->assertSame($clientValue, $constantsValue, "Constants::{$constName} should match Client::{$constName}");
+    }
+
+    /**
+     * @return array<string, array{string, int}>
+     */
+    public static function phpredisValuesProvider(): array
+    {
+        return [
+            'OPT_SERIALIZER'           => ['OPT_SERIALIZER', 1],
+            'OPT_PREFIX'               => ['OPT_PREFIX', 2],
+            'OPT_READ_TIMEOUT'         => ['OPT_READ_TIMEOUT', 3],
+            'OPT_SCAN'                 => ['OPT_SCAN', 4],
+            'OPT_FAILOVER'             => ['OPT_FAILOVER', 5],
+            'OPT_TCP_KEEPALIVE'        => ['OPT_TCP_KEEPALIVE', 6],
+            'OPT_COMPRESSION'          => ['OPT_COMPRESSION', 7],
+            'OPT_REPLY_LITERAL'        => ['OPT_REPLY_LITERAL', 8],
+            'OPT_COMPRESSION_LEVEL'    => ['OPT_COMPRESSION_LEVEL', 9],
+            'OPT_NULL_MULTIBULK_AS_NULL' => ['OPT_NULL_MULTIBULK_AS_NULL', 10],
+            'OPT_MAX_RETRIES'          => ['OPT_MAX_RETRIES', 11],
+            'OPT_BACKOFF_ALGORITHM'    => ['OPT_BACKOFF_ALGORITHM', 12],
+            'OPT_BACKOFF_BASE'         => ['OPT_BACKOFF_BASE', 13],
+            'OPT_BACKOFF_CAP'          => ['OPT_BACKOFF_CAP', 14],
+            'OPT_PACK_IGNORE_NUMBERS'  => ['OPT_PACK_IGNORE_NUMBERS', 15],
+        ];
+    }
+
+    #[Test]
+    #[DataProvider('phpredisValuesProvider')]
+    public function phpredis_compatible_values(string $constName, int $expectedValue): void
+    {
+        $actualValue = constant(Constants::class . '::' . $constName);
+
+        $this->assertSame(
+            $expectedValue,
+            $actualValue,
+            "Constants::{$constName} should be {$expectedValue} (phpredis value)"
+        );
+    }
+
+    #[Test]
+    public function map_to_extension_passes_through_all_values(): void
+    {
+        // In-range values pass through unchanged
+        $this->assertSame(1, Constants::mapToExtension(1));
+        $this->assertSame(8, Constants::mapToExtension(8));
+        $this->assertSame(15, Constants::mapToExtension(15));
+
+        // Out-of-range values also pass through unchanged
+        $this->assertSame(999, Constants::mapToExtension(999));
+        $this->assertSame(0, Constants::mapToExtension(0));
+    }
+
+    #[Test]
+    public function opt_constants_match_c_extension(): void
+    {
+        $optConstants = [
+            'OPT_SERIALIZER',
+            'OPT_PREFIX',
+            'OPT_READ_TIMEOUT',
+            'OPT_SCAN',
+            'OPT_FAILOVER',
+            'OPT_TCP_KEEPALIVE',
+            'OPT_COMPRESSION',
+            'OPT_REPLY_LITERAL',
+            'OPT_COMPRESSION_LEVEL',
+            'OPT_NULL_MULTIBULK_AS_NULL',
+            'OPT_MAX_RETRIES',
+            'OPT_BACKOFF_ALGORITHM',
+            'OPT_BACKOFF_BASE',
+            'OPT_BACKOFF_CAP',
+            'OPT_PACK_IGNORE_NUMBERS',
+        ];
+
+        foreach ($optConstants as $name) {
+            $compatValue = constant(Constants::class . '::' . $name);
+            $extensionValue = constant(ValkeyGlide::class . '::' . $name);
+
+            $this->assertSame(
+                $extensionValue,
+                $compatValue,
+                "Constants::{$name} ({$compatValue}) should equal ValkeyGlide::{$name} ({$extensionValue})"
+            );
+        }
     }
 }

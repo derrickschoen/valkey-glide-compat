@@ -7,8 +7,8 @@ namespace ValkeyGlideCompat;
 /**
  * phpredis-compatible constant names.
  *
- * Values are identical to ValkeyGlide's C extension constants.
- * This class provides the Redis::REDIS_* naming convention that phpredis users expect.
+ * OPT_* values 1-15 match both phpredis and the ValkeyGlide C extension.
+ * The mapToExtension() helper exists as a stable API boundary.
  */
 final class Constants
 {
@@ -25,22 +25,22 @@ final class Constants
     public const MULTI = 0;
     public const PIPELINE = 1;
 
-    // Option constants (OPT_*)
-    public const OPT_REPLY_LITERAL = 1;
-    public const OPT_SERIALIZER = 16;
-    public const OPT_PREFIX = 17;
-    public const OPT_READ_TIMEOUT = 18;
-    public const OPT_SCAN = 19;
-    public const OPT_FAILOVER = 20;
-    public const OPT_TCP_KEEPALIVE = 21;
-    public const OPT_COMPRESSION = 22;
-    public const OPT_COMPRESSION_LEVEL = 23;
-    public const OPT_NULL_MULTIBULK_AS_NULL = 24;
-    public const OPT_MAX_RETRIES = 25;
-    public const OPT_BACKOFF_ALGORITHM = 26;
-    public const OPT_BACKOFF_BASE = 27;
-    public const OPT_BACKOFF_CAP = 28;
-    public const OPT_PACK_IGNORE_NUMBERS = 29;
+    // Option constants — phpredis-compatible values (OPT_*)
+    public const OPT_SERIALIZER = 1;
+    public const OPT_PREFIX = 2;
+    public const OPT_READ_TIMEOUT = 3;
+    public const OPT_SCAN = 4;
+    public const OPT_FAILOVER = 5;
+    public const OPT_TCP_KEEPALIVE = 6;
+    public const OPT_COMPRESSION = 7;
+    public const OPT_REPLY_LITERAL = 8;
+    public const OPT_COMPRESSION_LEVEL = 9;
+    public const OPT_NULL_MULTIBULK_AS_NULL = 10;
+    public const OPT_MAX_RETRIES = 11;
+    public const OPT_BACKOFF_ALGORITHM = 12;
+    public const OPT_BACKOFF_BASE = 13;
+    public const OPT_BACKOFF_CAP = 14;
+    public const OPT_PACK_IGNORE_NUMBERS = 15;
 
     // Serializer constants (SERIALIZER_*)
     public const SERIALIZER_NONE = 0;
@@ -63,4 +63,10 @@ final class Constants
     public const BACKOFF_ALGORITHM_EXPONENTIAL = 4;
     public const BACKOFF_ALGORITHM_UNIFORM = 5;
     public const BACKOFF_ALGORITHM_CONSTANT = 6;
+
+    /** Translate a PHPRedis option ID to the C extension's ID. */
+    public static function mapToExtension(int $option): int
+    {
+        return $option;
+    }
 }
