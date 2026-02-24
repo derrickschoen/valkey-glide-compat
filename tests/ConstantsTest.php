@@ -119,6 +119,11 @@ class ConstantsTest extends TestCase
             'OPT_BACKOFF_BASE'         => ['OPT_BACKOFF_BASE', 13],
             'OPT_BACKOFF_CAP'          => ['OPT_BACKOFF_CAP', 14],
             'OPT_PACK_IGNORE_NUMBERS'  => ['OPT_PACK_IGNORE_NUMBERS', 15],
+            'OPT_SLAVE_FAILOVER'         => ['OPT_SLAVE_FAILOVER', 5],
+            'FAILOVER_NONE'              => ['FAILOVER_NONE', 0],
+            'FAILOVER_ERROR'             => ['FAILOVER_ERROR', 1],
+            'FAILOVER_DISTRIBUTE'        => ['FAILOVER_DISTRIBUTE', 2],
+            'FAILOVER_DISTRIBUTE_SLAVES' => ['FAILOVER_DISTRIBUTE_SLAVES', 3],
         ];
     }
 

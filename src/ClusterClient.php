@@ -55,6 +55,13 @@ class ClusterClient implements ClientInterface
     public const OPT_BACKOFF_BASE = Constants::OPT_BACKOFF_BASE;
     public const OPT_BACKOFF_CAP = Constants::OPT_BACKOFF_CAP;
     public const OPT_PACK_IGNORE_NUMBERS = Constants::OPT_PACK_IGNORE_NUMBERS;
+    public const OPT_SLAVE_FAILOVER = Constants::OPT_SLAVE_FAILOVER;
+
+    // Failover strategy constants
+    public const FAILOVER_NONE = Constants::FAILOVER_NONE;
+    public const FAILOVER_ERROR = Constants::FAILOVER_ERROR;
+    public const FAILOVER_DISTRIBUTE = Constants::FAILOVER_DISTRIBUTE;
+    public const FAILOVER_DISTRIBUTE_SLAVES = Constants::FAILOVER_DISTRIBUTE_SLAVES;
 
     // Serializer constants
     public const SERIALIZER_NONE = Constants::SERIALIZER_NONE;

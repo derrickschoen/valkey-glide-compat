@@ -107,6 +107,40 @@ class PhpRedisClusterClientTest extends TestCase
         $this->assertSame($constantsValue, $value);
     }
 
+    /**
+     * @return array<string, array{string}>
+     */
+    public static function clusterOnlyConstantsProvider(): array
+    {
+        return [
+            'OPT_SLAVE_FAILOVER' => ['OPT_SLAVE_FAILOVER'],
+            'FAILOVER_NONE' => ['FAILOVER_NONE'],
+            'FAILOVER_ERROR' => ['FAILOVER_ERROR'],
+            'FAILOVER_DISTRIBUTE' => ['FAILOVER_DISTRIBUTE'],
+            'FAILOVER_DISTRIBUTE_SLAVES' => ['FAILOVER_DISTRIBUTE_SLAVES'],
+        ];
+    }
+
+    #[Test]
+    #[DataProvider('clusterOnlyConstantsProvider')]
+    public function cluster_only_constants_match_constants_class(string $constName): void
+    {
+        $value = constant(PhpRedisClusterClient::class . '::' . $constName);
+        $constantsValue = constant(Constants::class . '::' . $constName);
+
+        $this->assertSame($constantsValue, $value);
+    }
+
+    #[Test]
+    public function failover_constants_match_phpredis_values(): void
+    {
+        $this->assertSame(\RedisCluster::OPT_SLAVE_FAILOVER, PhpRedisClusterClient::OPT_SLAVE_FAILOVER);
+        $this->assertSame(\RedisCluster::FAILOVER_NONE, PhpRedisClusterClient::FAILOVER_NONE);
+        $this->assertSame(\RedisCluster::FAILOVER_ERROR, PhpRedisClusterClient::FAILOVER_ERROR);
+        $this->assertSame(\RedisCluster::FAILOVER_DISTRIBUTE, PhpRedisClusterClient::FAILOVER_DISTRIBUTE);
+        $this->assertSame(\RedisCluster::FAILOVER_DISTRIBUTE_SLAVES, PhpRedisClusterClient::FAILOVER_DISTRIBUTE_SLAVES);
+    }
+
     #[Test]
     public function get_driver_returns_redis_cluster_instance(): void
     {

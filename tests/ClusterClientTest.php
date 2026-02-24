@@ -93,6 +93,48 @@ class ClusterClientTest extends TestCase
         );
     }
 
+    /**
+     * @return array<string, array{string}>
+     */
+    public static function clusterOnlyConstantsProvider(): array
+    {
+        return [
+            'OPT_SLAVE_FAILOVER' => ['OPT_SLAVE_FAILOVER'],
+            'FAILOVER_NONE' => ['FAILOVER_NONE'],
+            'FAILOVER_ERROR' => ['FAILOVER_ERROR'],
+            'FAILOVER_DISTRIBUTE' => ['FAILOVER_DISTRIBUTE'],
+            'FAILOVER_DISTRIBUTE_SLAVES' => ['FAILOVER_DISTRIBUTE_SLAVES'],
+        ];
+    }
+
+    #[Test]
+    #[DataProvider('clusterOnlyConstantsProvider')]
+    public function cluster_only_constants_match_constants_class(string $constName): void
+    {
+        $clusterValue = constant(ClusterClient::class . '::' . $constName);
+        $constantsValue = constant(Constants::class . '::' . $constName);
+
+        $this->assertSame(
+            $constantsValue,
+            $clusterValue,
+            "ClusterClient::{$constName} should match Constants::{$constName}",
+        );
+    }
+
+    #[Test]
+    public function failover_constants_match_phpredis_values(): void
+    {
+        if (! extension_loaded('redis')) {
+            $this->markTestSkipped('ext-redis not loaded');
+        }
+
+        $this->assertSame(\RedisCluster::OPT_SLAVE_FAILOVER, ClusterClient::OPT_SLAVE_FAILOVER);
+        $this->assertSame(\RedisCluster::FAILOVER_NONE, ClusterClient::FAILOVER_NONE);
+        $this->assertSame(\RedisCluster::FAILOVER_ERROR, ClusterClient::FAILOVER_ERROR);
+        $this->assertSame(\RedisCluster::FAILOVER_DISTRIBUTE, ClusterClient::FAILOVER_DISTRIBUTE);
+        $this->assertSame(\RedisCluster::FAILOVER_DISTRIBUTE_SLAVES, ClusterClient::FAILOVER_DISTRIBUTE_SLAVES);
+    }
+
     // =========================================================================
     // Seed parsing tests (IPv6)
     // =========================================================================
