@@ -87,7 +87,7 @@ class PhpRedisClusterClient implements ClientInterface
 
         $this->redis = new \RedisCluster(
             $name,
-            $seeds ?? [],
+            $seeds,
             $timeout ?? 0.0,
             $read_timeout ?? 0.0,
             $persistent,
