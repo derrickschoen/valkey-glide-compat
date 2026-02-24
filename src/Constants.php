@@ -41,6 +41,15 @@ final class Constants
     public const OPT_BACKOFF_CAP = 14;
     public const OPT_PACK_IGNORE_NUMBERS = 15;
 
+    // Legacy alias (phpredis RedisCluster::OPT_SLAVE_FAILOVER)
+    public const OPT_SLAVE_FAILOVER = self::OPT_FAILOVER;
+
+    // Failover strategy constants (FAILOVER_*)
+    public const FAILOVER_NONE = 0;
+    public const FAILOVER_ERROR = 1;
+    public const FAILOVER_DISTRIBUTE = 2;
+    public const FAILOVER_DISTRIBUTE_SLAVES = 3;
+
     // Serializer constants (SERIALIZER_*)
     public const SERIALIZER_NONE = 0;
     public const SERIALIZER_PHP = 1;
