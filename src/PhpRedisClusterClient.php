@@ -9,6 +9,8 @@ namespace ValkeyGlideCompat;
  */
 class PhpRedisClusterClient implements ClientInterface
 {
+    use Concern\PhpRedisPassthrough;
+
     // Data types (phpredis Redis::REDIS_*)
     public const REDIS_NOT_FOUND = Constants::REDIS_NOT_FOUND;
     public const REDIS_STRING = Constants::REDIS_STRING;
@@ -87,7 +89,7 @@ class PhpRedisClusterClient implements ClientInterface
 
         $this->redis = new \RedisCluster(
             $name,
-            $seeds,
+            $seeds ?? [],
             $timeout ?? 0.0,
             $read_timeout ?? 0.0,
             $persistent,

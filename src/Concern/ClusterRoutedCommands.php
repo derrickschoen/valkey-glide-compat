@@ -11,59 +11,64 @@ namespace ValkeyGlideCompat\Concern;
  */
 trait ClusterRoutedCommands
 {
-    abstract protected function getGlideClient(): \ValkeyGlide|\ValkeyGlideCluster;
+    /** @return \ValkeyGlide|\ValkeyGlideCluster */
+    abstract protected function getDriver(): object;
 
-    public function ping(mixed $route, ?string $message = null): mixed
+    public function ping(mixed $route = null, ?string $message = null): mixed
     {
+        // ValkeyGlideCluster requires a route parameter; when omitted,
+        // use 'randomNode' to match phpredis RedisCluster::ping() behavior.
+        $route ??= 'randomNode';
+
         if ($message === null) {
-            return $this->getGlideClient()->ping($route);
+            return $this->getDriver()->ping($route);
         }
 
-        return $this->getGlideClient()->ping($route, $message);
+        return $this->getDriver()->ping($route, $message);
     }
 
     public function flushDB(mixed $route, bool $async = false): mixed
     {
-        return $this->getGlideClient()->flushDB($route, $async);
+        return $this->getDriver()->flushDB($route, $async);
     }
 
     public function flushAll(mixed $route, bool $async = false): mixed
     {
-        return $this->getGlideClient()->flushAll($route, $async);
+        return $this->getDriver()->flushAll($route, $async);
     }
 
     public function dbSize(mixed $route): mixed
     {
-        return $this->getGlideClient()->dbSize($route);
+        return $this->getDriver()->dbSize($route);
     }
 
     public function info(mixed $route, string ...$sections): mixed
     {
-        return $this->getGlideClient()->info($route, ...$sections);
+        return $this->getDriver()->info($route, ...$sections);
     }
 
     public function time(mixed $route): mixed
     {
-        return $this->getGlideClient()->time($route);
+        return $this->getDriver()->time($route);
     }
 
     public function randomKey(mixed $route): mixed
     {
-        return $this->getGlideClient()->randomKey($route);
+        return $this->getDriver()->randomKey($route);
     }
 
     public function echo(mixed $route, string $msg): mixed
     {
-        return $this->getGlideClient()->echo($route, $msg);
+        return $this->getDriver()->echo($route, $msg);
     }
 
     public function client(mixed $route, string $subcommand, ?string $arg = null): mixed
     {
-        return $this->getGlideClient()->client($route, $subcommand, $arg);
+        return $this->getDriver()->client($route, $subcommand, $arg);
     }
 
     public function rawcommand(mixed $route, string $command, mixed ...$args): mixed
     {
-        return $this->getGlideClient()->rawcommand($route, $command, ...$args);
+        return $this->getDriver()->rawcommand($route, $command, ...$args);
     }
 }

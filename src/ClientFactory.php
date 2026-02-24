@@ -63,10 +63,6 @@ class ClientFactory
     ): ClientInterface {
         $backend = $preferredBackend ?? self::detectBackend();
 
-        if (! in_array($backend, [self::BACKEND_GLIDE, self::BACKEND_PHPREDIS], true)) {
-            throw new \RuntimeException("Unknown backend: {$backend}");
-        }
-
         if (($seeds === null || $seeds === []) && $name === null) {
             throw new \RuntimeException(
                 'Cluster configuration is required. Pass $name or non-empty $seeds.'
@@ -93,6 +89,7 @@ class ClientFactory
                 $auth,
                 $context,
             ),
+            default => throw new \RuntimeException("Unknown backend: {$backend}"),
         };
     }
 

@@ -327,14 +327,6 @@ class ClientTest extends TestCase
     }
 
     #[Test]
-    public function it_exposes_underlying_glide_client(): void
-    {
-        $glide = $this->client->getGlideClient();
-
-        $this->assertInstanceOf(\ValkeyGlide::class, $glide);
-    }
-
-    #[Test]
     public function it_exposes_underlying_driver(): void
     {
         $driver = $this->client->getDriver();
@@ -360,6 +352,64 @@ class ClientTest extends TestCase
         $this->assertSame($host, $client->getHost());
         $this->assertSame($port, $client->getPort());
 
+        $client->close();
+    }
+
+    #[Test]
+    public function open_works_as_connect_alias(): void
+    {
+        $client = new Client();
+        $host = getenv('VALKEY_HOST') ?: '127.0.0.1';
+        $port = (int) (getenv('VALKEY_PORT') ?: 6379);
+
+        $result = $client->open($host, $port);
+
+        $this->assertTrue($result);
+        $this->assertTrue($client->isConnected());
+
+        $client->close();
+    }
+
+    #[Test]
+    public function popen_works_as_connect_alias(): void
+    {
+        $client = new Client();
+        $host = getenv('VALKEY_HOST') ?: '127.0.0.1';
+        $port = (int) (getenv('VALKEY_PORT') ?: 6379);
+
+        $result = $client->popen($host, $port);
+
+        $this->assertTrue($result);
+        $this->assertTrue($client->isConnected());
+
+        $client->close();
+    }
+
+    #[Test]
+    public function persistent_id_triggers_notice(): void
+    {
+        $client = new Client();
+        $host = getenv('VALKEY_HOST') ?: '127.0.0.1';
+        $port = (int) (getenv('VALKEY_PORT') ?: 6379);
+
+        $noticed = false;
+        set_error_handler(function (int $errno, string $errstr) use (&$noticed): bool {
+            if ($errno === E_USER_NOTICE && str_contains($errstr, 'persistent_id is accepted for API')) {
+                $noticed = true;
+
+                return true;
+            }
+
+            return false;
+        });
+
+        try {
+            $client->connect($host, $port, 0.0, 'my_persistent_id');
+        } finally {
+            restore_error_handler();
+        }
+
+        $this->assertTrue($noticed, 'Expected E_USER_NOTICE about persistent_id');
         $client->close();
     }
 
@@ -730,7 +780,7 @@ class ClientTest extends TestCase
         $this->assertSame('test:', $prefix);
 
         // Verify it reached the C extension by checking via the underlying glide client
-        $glidePrefix = $this->client->getGlideClient()->getOption(\ValkeyGlide::OPT_PREFIX);
+        $glidePrefix = $this->client->getDriver()->getOption(\ValkeyGlide::OPT_PREFIX);
         $this->assertSame('test:', $glidePrefix);
 
         // Clean up
@@ -745,7 +795,7 @@ class ClientTest extends TestCase
         $this->assertSame('raw:', $this->client->getOption(2));
 
         // Verify C extension actually received it
-        $this->assertSame('raw:', $this->client->getGlideClient()->getOption(\ValkeyGlide::OPT_PREFIX));
+        $this->assertSame('raw:', $this->client->getDriver()->getOption(\ValkeyGlide::OPT_PREFIX));
 
         // Clean up
         $this->client->setOption(2, '');
@@ -758,7 +808,7 @@ class ClientTest extends TestCase
         $this->client->setOption(8, true);
 
         // Verify via C extension (fork uses value 1 for OPT_REPLY_LITERAL)
-        $this->assertTrue((bool) $this->client->getGlideClient()->getOption(\ValkeyGlide::OPT_REPLY_LITERAL));
+        $this->assertTrue((bool) $this->client->getDriver()->getOption(\ValkeyGlide::OPT_REPLY_LITERAL));
 
         // Clean up
         $this->client->setOption(8, false);

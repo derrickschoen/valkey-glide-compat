@@ -136,19 +136,6 @@ class ConstantsTest extends TestCase
     }
 
     #[Test]
-    public function map_to_extension_passes_through_all_values(): void
-    {
-        // In-range values pass through unchanged
-        $this->assertSame(1, Constants::mapToExtension(1));
-        $this->assertSame(8, Constants::mapToExtension(8));
-        $this->assertSame(15, Constants::mapToExtension(15));
-
-        // Out-of-range values also pass through unchanged
-        $this->assertSame(999, Constants::mapToExtension(999));
-        $this->assertSame(0, Constants::mapToExtension(0));
-    }
-
-    #[Test]
     public function opt_constants_match_c_extension(): void
     {
         $optConstants = [

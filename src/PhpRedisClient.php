@@ -9,6 +9,8 @@ namespace ValkeyGlideCompat;
  */
 class PhpRedisClient implements ClientInterface
 {
+    use Concern\PhpRedisPassthrough;
+
     // Data types (phpredis Redis::REDIS_*)
     public const REDIS_NOT_FOUND = Constants::REDIS_NOT_FOUND;
     public const REDIS_STRING = Constants::REDIS_STRING;
