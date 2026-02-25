@@ -94,15 +94,23 @@ class PhpRedisClusterClient implements ClientInterface
             throw new \RuntimeException('ext-redis not loaded');
         }
 
-        $this->redis = new \RedisCluster(
-            $name,
-            $seeds ?? [],
-            $timeout ?? 0.0,
-            $read_timeout ?? 0.0,
-            $persistent,
-            $auth,
-            $context,
-        );
+        // phpredis 6.x bug: RedisCluster::__construct() declares
+        // ?array $seeds = null but throws TypeError when null is passed
+        // explicitly. The only way to trigger name-based seed lookup
+        // (redis.clusters.seeds.<name> in php.ini) is to omit the
+        // $seeds argument entirely. This means timeout/auth/etc. must
+        // be configured via php.ini for name-based clusters.
+        $this->redis = $seeds === null
+            ? new \RedisCluster($name)
+            : new \RedisCluster(
+                $name,
+                $seeds,
+                $timeout ?? 0.0,
+                $read_timeout ?? 0.0,
+                $persistent,
+                $auth,
+                $context,
+            );
     }
 
     public function getDriver(): \RedisCluster
